@@ -19,12 +19,10 @@ class Ball {
 		if (this.pos.y+this.r > height) this.wallCollision(createVector(0, 1));
 		if (this.pos.y-this.r < 0) this.wallCollision(createVector(0,-1));
 
-		for (const brickArr of this.refs.bricks){
-			for (const brick of brickArr) {
-				const collision = this.collidesWith(brick);
-				if (collision.x || collision.y) {
-					this.brickCollision(brick, collision);
-				}
+		for (const brick of this.refs.bricks){
+			const collision = this.collidesWith(brick);
+			if (collision.x || collision.y) {
+				this.brickCollision(brick, collision);
 			}
 		}
 	}
@@ -99,7 +97,7 @@ class Ball {
 
 		if (side.x) this.vel.x *= -1;
 		if (side.y) this.vel.y *= -1;
-		// window.div.elt.innerText = `Collision on brick ${brick.toString()}, side ${side}`;
+		brick.ballCollision(this);
 	}
 
 	toString() {
