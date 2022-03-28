@@ -1,5 +1,6 @@
 class Brick {
-	constructor(num, x, y, w, h, refs) {
+	constructor(idx, num, x, y, w, h, refs) {
+		this.idx = idx;
 		this.num = num;
 		this.pos = createVector(x, y);
 		this.size = createVector(w, h);
@@ -42,8 +43,12 @@ class Brick {
 		this.num--;
 		if (this.num <= 0) {
 			// delete this element
-			this.pos = createVector(Infinity, Infinity);
+			this.remove();
 		}
+	}
+
+	remove(){
+		this.refs.bricks[this.idx] = null;
 	}
 
 	mouseCollision() {

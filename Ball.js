@@ -1,10 +1,13 @@
 class Ball {
-	constructor(x, y, r, refs) {
-		this.r = r;
+	constructor(idx, x, y, refs) {
+		this.idx = idx;
+		this.maxVel = 3;
+		this.r = 10;
 		this.color = 'red';
 		this.pos = createVector(x, y);
 		this.vel = createVector(random() - 0.5, random() - 0.5).setMag(2);
 		this.refs = refs;
+		this.collision = true;
 	}
 
 	show() {
@@ -13,7 +16,7 @@ class Ball {
 	}
 
 	update() {
-		this.vel.setMag(3);
+		this.vel.setMag(this.maxVel);
 		this.pos.add(this.vel);
 
 		if (this.pos.x + this.r > width) this.wallCollision(createVector(1, 0));
@@ -21,15 +24,19 @@ class Ball {
 		if (this.pos.y + this.r > height) this.wallCollision(createVector(0, 1));
 		if (this.pos.y - this.r < 0) this.wallCollision(createVector(0, -1));
 
-		for (const ball of this.refs.balls) {
-			const collision = this.collidesWithBall(ball);
-			if (collision) {
-				this.vel.add(p5.Vector.sub(this.pos, ball.pos).setMag(3));
-				ball.vel.add(this.vel.copy().mult(-1));
+		if (this.collision)
+			for (const ball of this.refs.balls) {
+				if (ball === null || !ball.collision) continue;
+				const collision = this.collidesWithBall(ball);
+				if (collision && ball.collision) {
+					this.vel.add(p5.Vector.sub(this.pos, ball.pos).setMag(3));
+					ball.vel.add(this.vel.copy().mult(-1));
+					console.log(ball);
+				}
 			}
-		}
 
 		for (const brick of this.refs.bricks) {
+			if (brick === null) continue;
 			const collision = this.collidesWithBrick(brick);
 			if (collision.x || collision.y) {
 				this.brickCollision(brick, collision);
@@ -37,8 +44,12 @@ class Ball {
 		}
 	}
 
+	remove() {
+		this.refs.balls[this.idx] = null;
+	}
+
 	collidesWithBall(ball) {
-		if (ball === this) return false;
+		if (ball === this || !ball.collision) return false;
 		return (
 			dist(this.pos.x, this.pos.y, ball.pos.x, ball.pos.y) < this.r + ball.r
 		);
@@ -135,10 +146,12 @@ class SniperBall extends Ball {
 	wallCollision(wall) {
 		super.wallCollision(wall);
 		for (const brick of this.refs.bricks) {
+			if (brick === null) continue;
 			brick.highlight = false;
 		}
 		let nearestBrick = this.refs.bricks
 			.slice()
+			.filter((b) => b !== null)
 			.sort(
 				(a, b) =>
 					dist(a.pos.x, a.pos.y, this.pos.x, this.pos.y) -
@@ -150,5 +163,40 @@ class SniperBall extends Ball {
 				.add(nearestBrick.size.x / 2, nearestBrick.size.y / 2),
 			this.pos,
 		);
+	}
+}
+
+class OneTimeBall extends Ball {
+	constructor() {
+		super(...arguments);
+		this.color = 'orange';
+		this.r = 5;
+		this.collision = false;
+		this.maxVel = 2;
+	}
+	brickCollision() {
+		super.brickCollision(...arguments);
+		this.remove();
+	}
+}
+
+class ShooterBall extends Ball {
+	constructor() {
+		super(...arguments);
+		this.color = 'orange';
+	}
+	wallCollision() {
+		super.wallCollision(...arguments);
+		for (let i = 0; i < 4; i++){
+			let newBall = new OneTimeBall(
+				this.refs.balls.length,
+				this.pos.x,
+				this.pos.y,
+				this.refs,
+			);
+			newBall.vel = this.vel.copy();
+			newBall.vel.rotate((random() - 0.5));
+			this.refs.balls.push(newBall);
+		}
 	}
 }
