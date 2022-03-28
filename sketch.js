@@ -6,17 +6,24 @@ function debug(text) {
 	div.elt.innerText = text;
 }
 
+function colorMod(divident, divisor){
+	return 255 - map(divident % divisor, 0, divisor, 0, 255);
+}
+
 function setup() {
 	createCanvas(600, 400);
 	div = createDiv();
 	noStroke();
 
-	for (let i = 0; i < 3; i++) {
-		balls.push(new Ball(width / 2, height / 2, 10,{
+	for (let i = 0; i < 6; i++) {
+		balls.push(new Ball(random(width), random(height), 10,{
 			bricks: bricks,
 			balls: balls
 		}));
 	}
+	balls.push(new SniperBall(random(width), random(height), 10, {
+		bricks: bricks, balls: balls
+	}));
 
 	const BRICK_WIDTH = (width-20-10*4)/10,
 		BRICK_HEIGHT = (height-20-10*4)/10
