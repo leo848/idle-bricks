@@ -13,7 +13,7 @@ class Brick {
 	update() {}
 
 	show() {
-		if (this.mouseCollision()) fill(...this.color(c => c + 50));
+		if (this.mouseCollision()) fill(...this.color((c) => c + 50));
 		else fill(...this.color());
 		rect(this.pos.x, this.pos.y, this.size.x, this.size.y);
 		if (this.highlight) {
@@ -24,34 +24,38 @@ class Brick {
 
 			pop();
 		}
-		fill("black");
-		text(this.num, this.pos.x+this.size.x/2, this.pos.y+this.size.y/2);
+		fill('black');
+		text(this.num, this.pos.x + this.size.x / 2, this.pos.y + this.size.y / 2);
 	}
 
 	color(op) {
-		let color =  [
-			colorMod(this.num, 3), colorMod(this.num, 13), colorMod(this.num,23)
-		];	
-		if (op)
-			for (let i = 0; i < color.length; i++) color[i] = op(color[i]);
+		let color = [
+			colorMod(this.num, 3),
+			colorMod(this.num, 13),
+			colorMod(this.num, 23),
+		];
+		if (op) for (let i = 0; i < color.length; i++) color[i] = op(color[i]);
 		return color;
 	}
 
 	ballCollision(ball) {
 		this.num--;
 		if (this.num <= 0) {
+			// delete this element
 			this.pos = createVector(Infinity, Infinity);
 		}
 	}
 
 	mouseCollision() {
 		return (
-			mouseX > this.pos.x && mouseX < this.pos.x + this.size.x
-			&& mouseY > this.pos.y && mouseY < this.pos.y + this.size.y
+			mouseX > this.pos.x &&
+			mouseX < this.pos.x + this.size.x &&
+			mouseY > this.pos.y &&
+			mouseY < this.pos.y + this.size.y
 		);
 	}
 
 	toString() {
-		return `"Brick at ${[this.pos.x, this.pos.y]}"`
+		return `"Brick at ${[this.pos.x, this.pos.y]}"`;
 	}
 }
