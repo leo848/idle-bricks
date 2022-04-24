@@ -1,12 +1,10 @@
 class Ball {
-	constructor(idx, x, y, refs) {
-		this.idx = idx;
+	constructor(x, y) {
 		this.maxVel = 3;
 		this.r = 10;
 		this.color = 'red';
 		this.pos = createVector(x, y);
 		this.vel = createVector(random() - 0.5, random() - 0.5).setMag(2);
-		this.refs = refs;
 		this.collision = true;
 	}
 
@@ -25,17 +23,16 @@ class Ball {
 		if (this.pos.y - this.r < 0) this.wallCollision(createVector(0, -1));
 
 		if (this.collision)
-			for (const ball of this.refs.balls) {
+			for (const ball of Game.balls) {
 				if (ball === null || !ball.collision) continue;
 				const collision = this.collidesWithBall(ball);
 				if (collision && ball.collision) {
 					this.vel.add(p5.Vector.sub(this.pos, ball.pos).setMag(3));
 					ball.vel.add(this.vel.copy().mult(-1));
-					console.log(ball);
 				}
 			}
 
-		for (const brick of this.refs.bricks) {
+		for (const brick of Game.bricks) {
 			if (brick === null) continue;
 			const collision = this.collidesWithBrick(brick);
 			if (collision.x || collision.y) {
@@ -45,7 +42,7 @@ class Ball {
 	}
 
 	remove() {
-		this.refs.balls[this.idx] = null;
+		Game.balls = Game.balls.filter((b) => b !== this);
 	}
 
 	collidesWithBall(ball) {
@@ -145,11 +142,11 @@ class SniperBall extends Ball {
 
 	wallCollision(wall) {
 		super.wallCollision(wall);
-		for (const brick of this.refs.bricks) {
+		for (const brick of Game.bricks) {
 			if (brick === null) continue;
 			brick.highlight = false;
 		}
-		let nearestBrick = this.refs.bricks
+		let nearestBrick = Game.bricks
 			.slice()
 			.filter((b) => b !== null)
 			.sort(
@@ -187,16 +184,11 @@ class ShooterBall extends Ball {
 	}
 	wallCollision() {
 		super.wallCollision(...arguments);
-		for (let i = 0; i < 4; i++){
-			let newBall = new OneTimeBall(
-				this.refs.balls.length,
-				this.pos.x,
-				this.pos.y,
-				this.refs,
-			);
+		for (let i = 0; i < 4; i++) {
+			let newBall = new OneTimeBall(this.pos.x, this.pos.y);
 			newBall.vel = this.vel.copy();
-			newBall.vel.rotate((random() - 0.5));
-			this.refs.balls.push(newBall);
+			newBall.vel.rotate(random() - 0.5);
+			Game.balls.push(newBall);
 		}
 	}
 }

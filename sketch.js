@@ -1,86 +1,72 @@
-let bricks = [];
-let balls = [];
+let Game = {}; // holy game object
 
-let createButtons = [];
-let ballImplementations = [Ball, SniperBall, ShooterBall];
+Game.bricks = [];
+Game.balls = [];
 
-function colorMod(divident, divisor) {
-	return 255 - map(divident % divisor, 0, divisor, 0, 255);
+Game.createButtons = [];
+Game.ballImplementations = [Ball, SniperBall, ShooterBall];
+
+function colorByNum(num) {
+	return color(
+		map(sin(num / 5), -1, 1, 10, 245),
+		map(sin(num / 12 + PI / 4), -1, 1, 10, 245),
+		map(sin(num / 18 - PI / 4), -1, 1, 10, 245),
+	);
+}
+
+function preload() {
+	loadJSON('data.json', (json) => (Game = { ...Game, ...json }));
 }
 
 function setup() {
-	createCanvas(600, 400);
+	createCanvas(Game.canvasConfig.width, Game.canvasConfig.height);
+	Game.canvasConfig.brickWidth =
+		(width -
+			Game.canvasConfig.edge.horizontal * 2 -
+			Game.canvasConfig.gridWidth * 4) /
+		Game.canvasConfig.gridWidth;
+	Game.canvasConfig.brickHeight =
+		(height -
+			Game.canvasConfig.edge.vertical * 2 -
+			Game.canvasConfig.gridHeight * 4) /
+		Game.canvasConfig.gridHeight;
+	console.log(Game.canvasConfig.brickWidth);
+	console.log(
+		width - Game.canvasConfig.edge.horizontal - Game.canvasConfig.gridWidth,
+	);
+
+	Game.levels.forEach((e, i, arr) => (arr[i] = new Level(e)));
+	Game.levelIndex = 0;
+	Game.bricks = Game.levels[Game.levelIndex].bricks.slice();
+
 	div = createDiv();
 	noStroke();
+	colorMode(RGB);
 
-	for (const Impl of ballImplementations) {
-		createButtons.push(
+	for (const Impl of Game.ballImplementations) {
+		Game.createButtons.push(
 			createButton(Impl.name).mousePressed(() => {
-				balls.push(
-					new Impl(balls.length, width / 2, height / 2, {
-						bricks: bricks,
-						balls: balls,
-					}),
-				);
+				Game.balls.unshift(new Impl(width / 2, height / 2));
 			}),
 		);
-	}
-
-	const BRICK_WIDTH = (width - 20 - 10 * 4) / 10,
-		BRICK_HEIGHT = (height - 20 - 10 * 4) / 10;
-
-	for (let i = 0; i < 10; i++) {
-		for (let j = 0; j < 10; j++) {
-			if (random() < 0.25)
-				bricks.push(
-					new Brick(
-						bricks.length,
-						20,
-						10 + i * (BRICK_WIDTH + 4),
-						10 + j * (BRICK_HEIGHT + 4),
-						BRICK_WIDTH,
-						BRICK_HEIGHT,
-						{
-							bricks: bricks,
-							balls: balls,
-						},
-					),
-				);
-		}
 	}
 }
 
 function draw() {
 	background(32);
 
-	if (balls.length > 200) {
-		console.log("Collecting garbage...");
-		garbageCollection(balls);
-	}
-
-	for (const ball of balls) {
-		if (ball == null) continue;
+	for (const ball of Game.balls) {
 		ball.update();
 		ball.show();
 	}
 
-	for (const brick of bricks) {
-		if (brick == null) continue;
+	for (const brick of Game.bricks) {
 		brick.update();
 		brick.show();
 	}
-}
 
-function garbageCollection(arr) {
-	for (let i = 0; i < arr.length; i++) {
-		if (arr[i] === null) {
-			arr.splice(i, 1);
-		} else console.log(arr[i]);
+	if (Game.bricks.length <= 0) {
+		Game.levelIndex++;
+		Game.bricks = Game.levels[Game.levelIndex].bricks;
 	}
-	console.log(arr);
-	for (let i = 0; i < arr.length; i++) {
-		if (arr[i] === null) continue;
-		arr[i].idx = i;
-	}
-	if (arr.length > 200) arr.length = 200;
 }

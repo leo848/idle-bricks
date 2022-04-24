@@ -1,10 +1,23 @@
 class Brick {
-	constructor(idx, num, x, y, w, h, refs) {
-		this.idx = idx;
+	constructor(num, x, y) {
+		this.x = x;
+		this.y = y;
 		this.num = num;
-		this.pos = createVector(x, y);
-		this.size = createVector(w, h);
-		this.refs = refs;
+		this.pos = createVector(
+			Game.canvasConfig.edge.horizontal +
+				this.x *
+					(Game.canvasConfig.brickWidth +
+						Game.canvasConfig.innerEdge.horizontal),
+
+			Game.canvasConfig.edge.vertical +
+				this.y *
+					(Game.canvasConfig.brickHeight +
+						Game.canvasConfig.innerEdge.vertical),
+		);
+		this.size = createVector(
+			Game.canvasConfig.brickWidth,
+			Game.canvasConfig.brickHeight,
+		);
 		this.highlight = false;
 
 		textAlign(CENTER, CENTER);
@@ -14,8 +27,8 @@ class Brick {
 	update() {}
 
 	show() {
-		if (this.mouseCollision()) fill(...this.color((c) => c + 50));
-		else fill(...this.color());
+		// if (this.mouseCollision()) fill(...this.color((c) => c + 50));
+		/* else */ fill(colorByNum(this.num));
 		rect(this.pos.x, this.pos.y, this.size.x, this.size.y);
 		if (this.highlight) {
 			push();
@@ -29,16 +42,6 @@ class Brick {
 		text(this.num, this.pos.x + this.size.x / 2, this.pos.y + this.size.y / 2);
 	}
 
-	color(op) {
-		let color = [
-			colorMod(this.num, 3),
-			colorMod(this.num, 13),
-			colorMod(this.num, 23),
-		];
-		if (op) for (let i = 0; i < color.length; i++) color[i] = op(color[i]);
-		return color;
-	}
-
 	ballCollision(ball) {
 		this.num--;
 		if (this.num <= 0) {
@@ -47,8 +50,8 @@ class Brick {
 		}
 	}
 
-	remove(){
-		this.refs.bricks[this.idx] = null;
+	remove() {
+		Game.bricks = Game.bricks.filter((b) => b !== this);
 	}
 
 	mouseCollision() {
@@ -58,6 +61,17 @@ class Brick {
 			mouseY > this.pos.y &&
 			mouseY < this.pos.y + this.size.y
 		);
+	}
+
+	static fromCSV(values) {
+		let data = values.split(/,\s*/).map((e) => Number(e));
+		console.group()
+		console.log(...data);
+		if (data[1] < 0) data[1] += Game.canvasConfig.gridWidth;
+		if (data[2] < 0) data[2] += Game.canvasConfig.gridHeight;
+		console.log(...data);
+		console.groupEnd();
+		return new Brick(data[0], data[1], data[2]);
 	}
 
 	toString() {
