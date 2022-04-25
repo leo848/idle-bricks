@@ -29,7 +29,12 @@ class Brick {
 	show() {
 		// if (this.mouseCollision()) fill(...this.color((c) => c + 50));
 		/* else */ fill(colorByNum(this.num));
-		rect(this.pos.x, this.pos.y, this.size.x, this.size.y);
+		rect(
+			this.pos.x,
+			this.pos.y,
+			this.size.x,
+			this.size.y,
+		);
 		if (this.highlight) {
 			push();
 			stroke(255, 0, 0);
@@ -39,7 +44,7 @@ class Brick {
 			pop();
 		}
 		fill('black');
-		text(this.num, this.pos.x + this.size.x / 2, this.pos.y + this.size.y / 2);
+		text(Math.ceil(this.num), this.pos.x + this.size.x / 2, this.pos.y + this.size.y / 2);
 	}
 
 	ballCollision(ball) {
@@ -63,14 +68,14 @@ class Brick {
 		);
 	}
 
+	copy() {
+		return new Brick(this.num, this.x, this.y)
+	}
+
 	static fromCSV(values) {
 		let data = values.split(/,\s*/).map((e) => Number(e));
-		console.group()
-		console.log(...data);
 		if (data[1] < 0) data[1] += Game.canvasConfig.gridWidth;
 		if (data[2] < 0) data[2] += Game.canvasConfig.gridHeight;
-		console.log(...data);
-		console.groupEnd();
 		return new Brick(data[0], data[1], data[2]);
 	}
 

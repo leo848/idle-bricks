@@ -1,4 +1,4 @@
-let Game = {}; // holy game object
+let Game = {};
 
 Game.bricks = [];
 Game.balls = [];
@@ -19,7 +19,10 @@ function preload() {
 }
 
 function setup() {
-	createCanvas(Game.canvasConfig.width, Game.canvasConfig.height);
+	createCanvas(
+		Game.canvasConfig.width,
+		Game.canvasConfig.height
+	);
 	Game.canvasConfig.brickWidth =
 		(width -
 			Game.canvasConfig.edge.horizontal * 2 -
@@ -54,6 +57,13 @@ function setup() {
 
 function draw() {
 	background(32);
+	fill(255);
+
+	push()
+	textAlign(LEFT, LEFT)
+	textSize(25)
+	text(Game.levelIndex+1, 20, 20)
+	pop()
 
 	for (const ball of Game.balls) {
 		ball.update();
